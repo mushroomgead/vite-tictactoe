@@ -28,6 +28,11 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-color: #5A1E76;
+  background-image: url("/tic-tac-toe-logo.svg");
+  background-repeat: no-repeat;
+  background-position: bottom left;
+  background-size: 300px;
 }
 
 h1 {

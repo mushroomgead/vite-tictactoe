@@ -1,131 +1,174 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import Tile from './components/Tile.vue'
 
 enum Player {
   X = "X",
   O = "O"
 }
 
-enum GameState { }
+let tiles = ref<string[]>([])
+let winner = ref<string>("")
+let winnerCssClass = ref<string>("")
+let playerTurn = ref<Player>(Player.X)
 
-let currentTurn = ref<Player>(Player.X)
-let selectedMatrixX = ref<[number, number] | any>([])
-let selectedMatrixO = ref<[number, number] | any>([])
+const winningCombination = [
+  // Rows
+  { combo: [1, 2, 3], winnerClass: "strike-row-1" },
+  { combo: [4, 5, 6], winnerClass: "strike-row-2" },
+  { combo: [7, 8, 9], winnerClass: "strike-row-3" },
+  // Columns
+  { combo: [1, 4, 7], winnerClass: "strike-col-1" },
+  { combo: [2, 5, 8], winnerClass: "strike-col-2" },
+  { combo: [3, 6, 9], winnerClass: "strike-col-3" },
+  // Diagonals
+  { combo: [1, 5, 9], winnerClass: "strike-diagonals-1" },
+  { combo: [3, 5, 7], winnerClass: "strike-diagonals-2" },
+]
 
-function onTap(x: number, y: number) {
-  modifyList([x, y])
+function onTap(index: number) {
+  console.log(index, 'index');
+
+  const hadWinner = winner.value
+  if (!tiles.value[index] && !hadWinner) {
+    tiles.value[index] = playerTurn.value
+    playerTurn.value = playerTurn.value === Player.X ? Player.O : Player.X
+    onCheckWinner()
+  }
 }
 
-function modifyList(arr: [number, number]) {
-  const turn = currentTurn.value
-  const [indexX, indexO] = getCurrentIndex(arr)
-  const isChecked = turn === Player.X && indexO > -1 || turn === Player.O && indexX > -1 || turn === Player.X && indexX > -1 || turn === Player.O && indexO > -1
+function onCheckWinner() {
+  const tileValues = tiles.value
+  for (const { combo, winnerClass } of winningCombination) {
+    const firstPos = tileValues[combo[0]]
+    const secondPos = tileValues[combo[1]]
+    const thirdPos = tileValues[combo[2]]
 
-  if (isChecked) {
-    return
-  }
-
-  currentTurn.value = currentTurn.value === Player.X ? Player.O : Player.X
-
-  if (turn === Player.X) {
-    selectedMatrixX.value.push(arr)
-  }
-
-
-  if (turn === Player.O) {
-    selectedMatrixO.value.push(arr)
+    if (firstPos !== undefined && firstPos === secondPos && firstPos === thirdPos) {
+      if (firstPos === Player.X) {
+        winner.value = Player.X
+        winnerCssClass.value = winnerClass
+      } else {
+        winner.value = Player.O
+      }
+      return
+    }
   }
 }
 
-function getCurrentIndex(arr: [number, number]): [number, number] {
-  const indexX = getIndex(selectedMatrixX, arr)
-  const indexO = getIndex(selectedMatrixO, arr)
-  return [indexX, indexO]
-}
-
-function getIndex(list: any, arr: any) {
-  const index = list.value ? list.value.findIndex((item: any) => item[0] === arr[0] && item[1] === arr[1]) : -1
-  return index
-}
-
-function getStr(arr: [number, number]) {
-  const indexX = getIndex(selectedMatrixX, arr)
-  const indexO = getIndex(selectedMatrixO, arr)
-
-  if (indexX > -1) {
-    return Player.X
-  }
-
-  if (indexO > -1) {
-    return Player.O
-  }
-  return ""
-}
-
-function checkWinner() {
+function resetTiles() {
+  tiles.value = []
+  winner.value = ""
+  playerTurn.value = Player.X
+  winnerCssClass.value = ""
 }
 
 </script>
 
 <template>
-  <div class="container-game">
-    <div class="grid-item" @click="onTap(0, 0)">
-      <span>{{ getStr([0, 0]) }}</span>
-      <span>0, 0</span>
+  <div class="container">
+    <div class="container-game">
+      <Tile v-for="i in 9" :index="i" :title='tiles[i] ?? ""' :onTap="onTap" />
+      <div :class="['line', winnerCssClass]"></div>
     </div>
-    <div class="grid-item" @click="onTap(0, 1)">
-      <span>{{ getStr([0, 1]) }}</span>
-      <span>0, 1</span>
-    </div>
-    <div class="grid-item" @click="onTap(0, 2)">
-      <span>{{ getStr([0, 2]) }}</span>
-      <span>0, 2</span>
-    </div>
-    <div class="grid-item" @click="onTap(1, 0)">
-      <span>{{ getStr([1, 0]) }}</span>
-      <span>1, 0</span>
-    </div>
-    <div class="grid-item" @click="onTap(1, 1)">
-      <span>{{ getStr([1, 1]) }}</span>
-      <span>1, 1</span>
-    </div>
-    <div class="grid-item" @click="onTap(1, 2)">
-      <span>{{ getStr([1, 2]) }}</span>
-      <span>1, 2</span>
-    </div>
-    <div class="grid-item" @click="onTap(2, 0)">
-      <span>{{ getStr([2, 0]) }}</span>
-      <span>2, 0</span>
-    </div>
-    <div class="grid-item" @click="onTap(2, 1)">
-      <span>{{ getStr([2, 1]) }}</span>
-      <span>2, 1</span>
-    </div>
-    <div class="grid-item" @click="onTap(2, 2)">
-      <span>{{ getStr([2, 2]) }}</span>
-      <span>2, 2</span>
-    </div>
+    <button class="btn-reset" @click="resetTiles">NEW GAME</button>
   </div>
 </template>
 
 <style scoped>
-.container-game {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-row-gap: 2px;
-  grid-column-gap: 2px;
-  background-color: red;
-  width: 400px;
-  height: 400px;
+.container {
+  position: relative;
+  background-color: #2B0040;
+  padding: 60px;
+  border-radius: 20px;
 }
 
-.grid-item {
-  height: 133px;
-  background-color: pink;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 40px;
+.btn-reset {
+  background-color: white;
   color: #000000;
+  font-weight: 900;
+  width: 300px;
+  padding: 14px;
+}
+
+.line {
+  position: absolute;
+}
+
+.strike-col-1 {
+  width: 5px;
+  height: 430px;
+  background-color: aquamarine;
+  top: 0;
+  left: 60px;
+}
+
+.strike-col-2 {
+  width: 5px;
+  height: 430px;
+  background-color: aquamarine;
+  top: 0;
+  left: calc(403px / 2);
+}
+
+.strike-col-3 {
+  width: 5px;
+  height: 430px;
+  background-color: aquamarine;
+  top: 0;
+  left: calc(403px / 1.2);
+}
+
+.strike-row-1 {
+  width: 400px;
+  height: 5px;
+  background-color: aquamarine;
+  top: 66px;
+  left: 0;
+}
+
+.strike-row-2 {
+  width: 400px;
+  height: 5px;
+  background-color: aquamarine;
+  top: calc(66px * 3.3);
+  left: 0;
+}
+
+.strike-row-3 {
+  width: 400px;
+  height: 5px;
+  background-color: aquamarine;
+  top: calc(66px * 5.5);
+  left: 0;
+}
+
+.strike-diagonals-1 {
+  width: 146%;
+  height: 5px;
+  background-color: aquamarine;
+  top: 0;
+  -webkit-transform: rotate(47deg) translateY(0) translateX(0);
+  transform-origin: top left;
+}
+
+.strike-diagonals-2 {
+  top: 0;
+  right: 0;
+  width: 146%;
+  height: 5px;
+  background-color: aquamarine;
+  transform: rotate(-47deg);
+  transform-origin: top right;
+}
+
+.container-game {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-row-gap: 16px;
+  grid-column-gap: 16px;
+  width: 400px;
+  margin-bottom: 20px;
 }
 </style>
