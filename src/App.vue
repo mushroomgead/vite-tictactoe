@@ -2,6 +2,9 @@
 import { ref } from 'vue';
 import Tile from './components/Tile.vue'
 
+const audioClick = new Audio("/sounds/mixkit-handgun-click.mp3")
+const audioCongrat = new Audio("/sounds/mixkit-cartoon-laugh-voice.wav")
+
 enum Player {
   X = "X",
   O = "O"
@@ -27,10 +30,10 @@ const winningCombination = [
 ]
 
 function onTap(index: number) {
-  console.log(index, 'index');
 
   const hadWinner = winner.value
   if (!tiles.value[index] && !hadWinner) {
+    audioClick.play()
     tiles.value[index] = playerTurn.value
     playerTurn.value = playerTurn.value === Player.X ? Player.O : Player.X
     onCheckWinner()
@@ -38,6 +41,7 @@ function onTap(index: number) {
 }
 
 function onCheckWinner() {
+
   const tileValues = tiles.value
   for (const { combo, winnerClass } of winningCombination) {
     const firstPos = tileValues[combo[0]]
@@ -45,6 +49,7 @@ function onCheckWinner() {
     const thirdPos = tileValues[combo[2]]
 
     if (firstPos !== undefined && firstPos === secondPos && firstPos === thirdPos) {
+      audioCongrat.play()
       if (firstPos === Player.X) {
         winner.value = Player.X
         winnerCssClass.value = winnerClass
