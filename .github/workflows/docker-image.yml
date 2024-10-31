@@ -4,12 +4,15 @@ on:
     tags:
       - "v.*.*"
 
+env:
+  TAG_NAME: ${{github.ref_name}}
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Step1 - Checkout to TAG xxxx
+      - name: Step1 - Checkout to TAG $TAG_NAME
         uses: actions/checkout@v4
 
       - name: Step2 - Login to DockerHub
