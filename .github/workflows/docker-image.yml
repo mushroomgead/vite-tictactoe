@@ -22,7 +22,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Step3 - Build the docker image
-        run: docker build . -- file Dockerfile --tag mushroomgead/vite-tictactoe:$TAG_NAME
+        run: docker build -f Dockerfile . --tag mushroomgead/vite-tictactoe:$TAG_NAME
 
       - name: Step4 - Push the Docker image
         run: docker push mushroomgead/vite-tictactoe:$TAG_NAME
