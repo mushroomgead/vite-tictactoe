@@ -1,4 +1,4 @@
-name: build  tictactoe
+name: build-tictactoe
 on:
   push:
     tags:
