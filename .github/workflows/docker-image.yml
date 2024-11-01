@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Step1 - Checkout to TAG xxxx
+      - name: Step1 - Checkout to TAG $TAG_NAME
         uses: actions/checkout@v4
 
       - name: Step2 - Login to DockerHub
@@ -19,7 +19,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Step3 - Build the docker image
-        run: docker build -f Dockerfile -t mushroomgead/vite-tictactoe:$TAG_NAME .
+        run: docker build . --file Dockerfile --tag mushroomgead/vite-tictactoe:$TAG_NAME
 
       - name: Step4 - Push the Docker image
         run: docker push mushroomgead/vite-tictactoe:$TAG_NAME
